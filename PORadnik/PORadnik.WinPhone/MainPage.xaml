@@ -6,9 +6,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+    Background="DarkCyan" >
     <Grid>
+        <Button x:Name="dataDownload" Content="Button" HorizontalAlignment="Left" Margin="268,248,0,0" VerticalAlignment="Top" Click="button_Click"/>
+        <TextBlock x:Name="jsonView" HorizontalAlignment="Left" Margin="10,323,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="307" Width="367"/>
+        <ListView x:Name="listGuide" HorizontalAlignment="Left" Height="179" Margin="10,74,0,0" VerticalAlignment="Top" Width="367" ItemClick="listGuide_ItemClick" IsItemClickEnabled="True"/>
 
     </Grid>
 </Page>

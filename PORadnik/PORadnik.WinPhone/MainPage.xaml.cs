@@ -22,10 +22,10 @@ namespace PORadnik.WinPhone {
     public sealed partial class MainPage : Page {
         public MainPage() {
             this.InitializeComponent();
-
             this.NavigationCacheMode = NavigationCacheMode.Required;
         }
 
+        MyClass m = new MyClass();
         /// <summary>
         /// Invoked when this page is about to be displayed in a Frame.
         /// </summary>
@@ -39,6 +39,19 @@ namespace PORadnik.WinPhone {
             // Windows.Phone.UI.Input.HardwareButtons.BackPressed event.
             // If you are using the NavigationHelper provided by some templates,
             // this event is handled for you.
+        }
+
+        private void button_Click(object sender, RoutedEventArgs e) {
+            jsonView.Text = m.getJson(m.Url);
+            listGuide.ItemsSource = m.G;
+            listGuide.IsItemClickEnabled = true;
+        }
+
+        private void listGuide_ItemClick(object sender, ItemClickEventArgs e) {
+            listGuide.IsItemClickEnabled = false;
+            var guide = (Guide)e.ClickedItem;
+            jsonView.Text = m.getJson(m.urlSlide, guide);
+            listGuide.ItemsSource = m.S;
         }
     }
 }
