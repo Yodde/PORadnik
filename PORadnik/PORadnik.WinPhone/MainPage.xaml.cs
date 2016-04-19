@@ -13,6 +13,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
+
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=391641
 
 namespace PORadnik.WinPhone {
@@ -20,6 +21,7 @@ namespace PORadnik.WinPhone {
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
     public sealed partial class MainPage : Page {
+        string loginBox = "login";
         public MainPage() {
             this.InitializeComponent();
             this.NavigationCacheMode = NavigationCacheMode.Required;
@@ -42,16 +44,40 @@ namespace PORadnik.WinPhone {
         }
 
         private void button_Click(object sender, RoutedEventArgs e) {
-            jsonView.Text = m.getJson(m.Url);
-            listGuide.ItemsSource = m.G;
-            listGuide.IsItemClickEnabled = true;
+            if (MyClass.api != "0" && MyClass.api != "") {
+                jsonView.Text = m.GetJson(m.Url);
+                listGuide.ItemsSource = m.G;
+                listGuide.IsItemClickEnabled = true;
+            }
         }
 
         private void listGuide_ItemClick(object sender, ItemClickEventArgs e) {
             listGuide.IsItemClickEnabled = false;
             var guide = (Guide)e.ClickedItem;
-            jsonView.Text = m.getJson(m.urlSlide, guide);
+            jsonView.Text = m.GetJson(m.urlSlide, guide);
             listGuide.ItemsSource = m.S;
         }
+
+        private void sha_Click(object sender, RoutedEventArgs e) {
+            if (login.Text != string.Empty && login.Text != loginBox
+                && password.Password != string.Empty)
+                jsonView.Text = m.Authentication(login.Text, password.Password);
+            if (MyClass.api != "0" && MyClass.api != "") {
+                dataDownload.IsEnabled = true;
+            }
+            else
+                dataDownload.IsEnabled = false;
+        }
+
+        private void login_GotFocus(object sender, RoutedEventArgs e) {
+            var textbox = (TextBox)sender;
+            textbox.Text = string.Empty;
+        }
+
+        private void login_LostFocus(object sender, RoutedEventArgs e) {
+            if (login.Text == string.Empty)
+                login.Text = loginBox;
+        }
+
     }
 }

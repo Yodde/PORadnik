@@ -8,9 +8,18 @@
     mc:Ignorable="d"
     Background="DarkCyan" >
     <Grid>
-        <Button x:Name="dataDownload" Content="Button" HorizontalAlignment="Left" Margin="268,248,0,0" VerticalAlignment="Top" Click="button_Click"/>
-        <TextBlock x:Name="jsonView" HorizontalAlignment="Left" Margin="10,323,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="307" Width="367"/>
-        <ListView x:Name="listGuide" HorizontalAlignment="Left" Height="179" Margin="10,74,0,0" VerticalAlignment="Top" Width="367" ItemClick="listGuide_ItemClick" IsItemClickEnabled="True"/>
+        <Button x:Name="dataDownload" Content="Pobierz" HorizontalAlignment="Left" Margin="268,248,0,0" VerticalAlignment="Top" Click="button_Click" IsEnabled="False"/>
+        <TextBlock x:Name="jsonView" HorizontalAlignment="Left" Margin="10,413,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="217" Width="367" FontSize="20"/>
+        <ListView x:Name="listGuide" HorizontalAlignment="Left" Height="179" Margin="10,74,0,0" VerticalAlignment="Top" Width="367" ItemClick="listGuide_ItemClick" IsItemClickEnabled="True" >
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" FontSize="20"/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <Button x:Name="sha" Content="Zaloguj" HorizontalAlignment="Left" Margin="268,299,0,0" VerticalAlignment="Top" Click="sha_Click"/>
+        <TextBox x:Name="login" HorizontalAlignment="Left" Margin="10,253,0,0" TextWrapping="Wrap" Text="login" VerticalAlignment="Top" Width="191" GotFocus="login_GotFocus" LostFocus="login_LostFocus"/>
+        <PasswordBox x:Name="password" HorizontalAlignment="Left" Margin="10,309,0,0" VerticalAlignment="Top" Width="191"/>
 
     </Grid>
 </Page>
