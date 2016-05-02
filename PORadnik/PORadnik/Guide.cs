@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 namespace PORadnik {
     public class Guide {
         private int id;
-
         public int Id {
             get { return id; }
             set { id = value; }

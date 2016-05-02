@@ -5,21 +5,68 @@
     xmlns:local="using:PORadnik.WinPhone"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:my="using:PORadnik"
     mc:Ignorable="d"
     Background="DarkCyan" >
-    <Grid>
-        <Button x:Name="dataDownload" Content="Pobierz" HorizontalAlignment="Left" Margin="268,248,0,0" VerticalAlignment="Top" Click="button_Click" IsEnabled="False"/>
-        <TextBlock x:Name="jsonView" HorizontalAlignment="Left" Margin="10,413,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="217" Width="367" FontSize="20"/>
-        <ListView x:Name="listGuide" HorizontalAlignment="Left" Height="179" Margin="10,74,0,0" VerticalAlignment="Top" Width="367" ItemClick="listGuide_ItemClick" IsItemClickEnabled="True" >
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding}" FontSize="20"/>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-        <Button x:Name="sha" Content="Zaloguj" HorizontalAlignment="Left" Margin="268,299,0,0" VerticalAlignment="Top" Click="sha_Click"/>
-        <TextBox x:Name="login" HorizontalAlignment="Left" Margin="10,253,0,0" TextWrapping="Wrap" Text="login" VerticalAlignment="Top" Width="191" GotFocus="login_GotFocus" LostFocus="login_LostFocus"/>
-        <PasswordBox x:Name="password" HorizontalAlignment="Left" Margin="10,309,0,0" VerticalAlignment="Top" Width="191"/>
+    <Page.Transitions>
+        <TransitionCollection>
+            <NavigationThemeTransition>
+                <NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                    <CommonNavigationTransitionInfo IsStaggeringEnabled="True"/>
+                </NavigationThemeTransition.DefaultNavigationTransitionInfo>
+            </NavigationThemeTransition>
+        </TransitionCollection>
+    </Page.Transitions>
 
+    <Grid>
+        <Pivot x:Uid="Pivot" Title="Poradnik" x:Name="PivotApp" CommonNavigationTransitionInfo.IsStaggerElement="True">
+            <PivotItem 
+                x:Uid="Guides"
+                Margin="19,14.5,0,0"
+                Header="Poradniki"
+                CommonNavigationTransitionInfo.IsStaggerElement="True">
+                <Grid>
+                    <Button x:Name="dataDownload" Content="Pobierz" HorizontalAlignment="Left" Margin="262,403,0,0" VerticalAlignment="Top" Click="button_Click"/>
+                    <TextBlock x:Name="jsonView" HorizontalAlignment="Left" Margin="10,413,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="99" Width="247" FontSize="8"/>
+                    <ListView x:Name="listGuide" HorizontalAlignment="Left" Height="409" Margin="0,-1,0,0" VerticalAlignment="Top" Width="377" ItemClick="listGuide_ItemClick" IsItemClickEnabled="True" >
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <Image x:Name="SlideImage"  Source="{Binding ImageSos}" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="250" MaxHeight="250" 
+                                           IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" IsTapEnabled="False"/>
+                                    <TextBlock Text="{Binding Id}" FontSize="20"/>
+                                    <TextBlock Text="{Binding Description}" FontSize="20"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </PivotItem>
+            <PivotItem 
+                x:Uid="LoginPage"
+                Margin="19,14.5,0,0"
+                Header="Konto"
+                CommonNavigationTransitionInfo.IsStaggerElement="True">
+                <Grid x:Uid="ss">
+                    <Button x:Name="sha" Content="Zaloguj" HorizontalAlignment="Left" Margin="268,299,0,0" VerticalAlignment="Top" Click="sha_Click"/>
+                    <TextBox x:Name="login" HorizontalAlignment="Left" Margin="10,253,0,0" TextWrapping="Wrap" Text="login" VerticalAlignment="Top" Width="191" GotFocus="login_GotFocus" LostFocus="login_LostFocus"/>
+                    <PasswordBox x:Name="password" HorizontalAlignment="Left" Margin="10,309,0,0" VerticalAlignment="Top" Width="191"/>
+                </Grid>
+            </PivotItem>
+            <PivotItem 
+                x:Uid="Favorites"
+                Margin="19,14.5,0,0"
+                Header="Ulubione"
+                CommonNavigationTransitionInfo.IsStaggerElement="True">
+                <Grid>
+                    <Image x:Name="image" HorizontalAlignment="Left" Height="100" Margin="238,156,0,0" VerticalAlignment="Top" Width="100" Source="http://poradnik.mikroprint.pl/images/Bike-Step-3.jpg"/>
+
+                    <!--<ListView x:Uid="FavoritesGuides">
+
+                    </ListView>-->
+
+                </Grid>
+            </PivotItem>
+        </Pivot>
     </Grid>
 </Page>

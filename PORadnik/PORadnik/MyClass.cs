@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using System.Linq;
 using System.Collections.Generic;
 using PCLCrypto;
+using Xamarin.Forms;
 namespace PORadnik {
     public class MyClass {
         public string Url { get { return url; } }
@@ -18,13 +19,13 @@ namespace PORadnik {
         public List<Slide> S { get; set; }
         public static string api = "";
         public MyClass() {
-           // g = new Guide();
+            // g = new Guide();
             //g = new Guide(1, "Por", "Jak chodowac pora");
-           // g.addToList(new Slide(1, "Krok 1.", "jak chodowac pora", "Kup pora"));
+            // g.addToList(new Slide(1, "Krok 1.", "jak chodowac pora", "Kup pora"));
         }
         public string GetJson(string url) {
             string json = "";
-            using (var http = new HttpClient()){
+            using (var http = new HttpClient()) {
                 var response = http.GetAsync(url).Result;
                 if (response.IsSuccessStatusCode) {
                     var content = response.Content;
@@ -43,10 +44,12 @@ namespace PORadnik {
                 return json;
             }
         }
-        public string GetJson(string url,Guide guide) {
+        public string GetJson(string url, Guide guide) {
+            string imageURL = "http://poradnik.mikroprint.pl/get_images.php?id=";
+            string downloadImageURL = "http://poradnik.mikroprint.pl/images/";
             string json = "";
             using (var http = new HttpClient()) {
-                var response = http.GetAsync(url+guide.Id).Result;
+                var response = http.GetAsync(url + guide.Id).Result;
                 if (response.IsSuccessStatusCode) {
                     var content = response.Content;
                     json = content.ReadAsStringAsync().Result;
@@ -56,6 +59,22 @@ namespace PORadnik {
                     foreach (JToken result in results) {
                         Slide slide = JsonConvert.DeserializeObject<Slide>(result.ToString());
                         slidesResult.Add(slide);
+                        using (var imageHTTP = new HttpClient()) {
+                            var responseImg = http.GetAsync(imageURL + slide.Id).Result;
+                            if (responseImg.IsSuccessStatusCode) {
+                                var imgContent = responseImg.Content;
+                                var jsonImg = imgContent.ReadAsStringAsync().Result;
+                                JObject imgJo = JObject.Parse(jsonImg);
+                                if (imgJo.GetValue("success").ToString() != "0") {
+                                    IList<JToken> imgs = imgJo["image"].Children().ToList();
+                                    ImageClass ic = new ImageClass();
+                                    ic = JsonConvert.DeserializeObject<ImageClass>(imgs[0].ToString());
+                                    slide.ImageSos = downloadImageURL + ic.Name;
+                                    slide.ImageProp = ic;
+                                    //slide._image.Source = ImageSource.FromUri(new Uri(slide.ImageSos));
+                                }
+                            }
+                        }
                     }
                     S = slidesResult;
                 }
