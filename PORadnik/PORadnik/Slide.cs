@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xamarin.Forms;
 
 namespace PORadnik {
     public class Slide {
@@ -19,11 +14,11 @@ namespace PORadnik {
             get { return description; }
             set { description = value; }
         }
-        public Image _image;
+        //public Image _image;
         public string ImageSos {
             get; set;
         }
-        public ImageClass ImageProp { get; set; }
+        //public ImageClass ImageProp { get; set; }
 
 
         string guide;
@@ -36,7 +31,7 @@ namespace PORadnik {
             this.guide = guide;
         }
         public Slide() {
-            _image = new Image { Aspect = Aspect.AspectFit };
+            //_image = new Image { Aspect = Aspect.AspectFit };
         }
         //public override string ToString() {
         //    return id + "\n" + description + "\n";

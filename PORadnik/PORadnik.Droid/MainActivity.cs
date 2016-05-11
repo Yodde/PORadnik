@@ -38,7 +38,7 @@ namespace PORadnik.Droid
         public class GuideTable : ListActivity {
             protected override void OnCreate(Bundle savedInstanceState) {
                 base.OnCreate(savedInstanceState);
-                myClass.GetJson(myClass.Url);
+                myClass.GetGuides(myClass.Url);
                 ListView list = FindViewById<ListView>(Resource.Id.listGuide);
                 var items = new string[] { "Vegetables", "Fruits", "Flower Buds", "Legumes", "Bulbs", "Tubers" };
                 ListAdapter = new ArrayAdapter<string>(this,Android.Resource.Layout.SimpleExpandableListItem2,items);

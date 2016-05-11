@@ -17,8 +17,12 @@ namespace PORadnik {
             get { return description; }
             set { description = value; }
         }
+        private List<Slide> slides;
 
-        List<Slide> slides;
+        public List<Slide> Slides {
+            get { return slides; }
+            set { slides = value; }
+        }
         public Guide(int id, string description) {
             this.id = id;
             this.description = description;
@@ -26,6 +30,7 @@ namespace PORadnik {
         }
 
         public Guide() {
+            slides = new List<Slide>();
         }
 
         public void addToList(Slide s) {
@@ -34,5 +39,6 @@ namespace PORadnik {
         public override string ToString() {
             return id.ToString() + " " + description;
         }
+
     }
 }
