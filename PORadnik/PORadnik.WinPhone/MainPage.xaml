@@ -5,14 +5,9 @@
     xmlns:local="using:PORadnik.WinPhone"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:my="using:PORadnik"
     mc:Ignorable="d"
-<<<<<<< Updated upstream
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <Grid>
-
-=======
-    Background="DarkCyan" >
     <Page.Transitions>
         <TransitionCollection>
             <NavigationThemeTransition>
@@ -31,7 +26,11 @@
         </CommandBar>
     </Page.BottomAppBar>
     <Grid>
-        <Pivot x:Uid="Pivot" Title="Poradnik" x:Name="PivotApp" CommonNavigationTransitionInfo.IsStaggerElement="True" SelectionChanged="PivotApp_SelectionChanged">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="27*"/>
+            <ColumnDefinition Width="13*"/>
+        </Grid.ColumnDefinitions>
+        <Pivot x:Uid="Pivot" Title="Poradnik" x:Name="PivotApp" CommonNavigationTransitionInfo.IsStaggerElement="True" SelectionChanged="PivotApp_SelectionChanged" Grid.ColumnSpan="2">
             <PivotItem 
                 x:Uid="Guides"
                 Margin="19,14.5,0,0"
@@ -140,6 +139,5 @@
                 </Grid>
             </PivotItem>
         </Pivot>
->>>>>>> Stashed changes
     </Grid>
 </Page>

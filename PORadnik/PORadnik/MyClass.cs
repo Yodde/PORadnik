@@ -1,11 +1,3 @@
-<<<<<<< Updated upstream
-﻿using System;
-
-namespace PORadnik {
-    public class MyClass {
-        public MyClass() {
-        }
-=======
 ﻿using Newtonsoft.Json;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
@@ -176,7 +168,6 @@ namespace PORadnik {
             IFile file = await folder.GetFileAsync(fileName);
             return await file.ReadAllTextAsync();
         }
->>>>>>> Stashed changes
     }
 }
 
