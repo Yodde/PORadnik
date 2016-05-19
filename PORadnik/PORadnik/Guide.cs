@@ -19,6 +19,14 @@ namespace PORadnik {
             get { return slides; }
             set { slides = value; }
         }
+        private string name;
+
+        public string Name {
+            get { return name; }
+            set { name = value; }
+        }
+
+
         public Guide(int id, string description) {
             this.id = id;
             this.description = description;
@@ -35,14 +43,16 @@ namespace PORadnik {
         public override string ToString() {
             return id.ToString() + " " + description;
         }
+
+
         public override bool Equals(object obj) {
             Guide g = obj as Guide;
-            return g != null && g.id.Equals(this.id) && g.description.Equals(this.description);
+            return g != null && g.id.Equals(this.id) && g.name.Equals(this.name);
         }
         public override int GetHashCode() {
             int hash = 13;
             hash = (hash * 7) + this.id.GetHashCode();
-            hash = (hash * 7) + this.description.GetHashCode();
+            hash = (hash * 7) + this.name.GetHashCode();
             return hash; 
         }
     }

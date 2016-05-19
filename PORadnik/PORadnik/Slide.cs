@@ -14,12 +14,10 @@ namespace PORadnik {
             get { return description; }
             set { description = value; }
         }
-        //public Image _image;
         public string ImageSos {
             get; set;
         }
-        //public ImageClass ImageProp { get; set; }
-
+        public string Name { get; set; }
 
         string guide;
         DateTime createdAt;

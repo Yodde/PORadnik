@@ -6,7 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:my="using:PORadnik" Background="DarkCyan"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    NavigationCacheMode="Enabled">
     <Page.Transitions>
         <TransitionCollection>
             <NavigationThemeTransition>
@@ -18,10 +19,11 @@
     </Page.Transitions>
     <Page.BottomAppBar>
         <CommandBar  Opacity="0.5"  Visibility="Visible" Background="YellowGreen">
-            <AppBarButton Icon="Favorite" Label="Ulubione" x:Name="favButton" Visibility="Collapsed" Click="favButton_Click"/>
-            <AppBarButton Icon="Setting" Label="Ustawienia" Visibility="Collapsed" />
-            <AppBarButton x:Name="saveFavoritesButton" Icon="Save" Label="Zapisz" Click="AppBarButton_Click" />
+            <AppBarButton x:Name="favButton" Icon="Favorite" Label="Ulubione" Visibility="Collapsed" Click="favButton_Click"/>
+            <AppBarButton x:Name="goToSearchButton" Icon="Find" Label="Szukaj" Click="goToSearchButton_Click"/>
+            <AppBarButton x:Name="saveFavoritesButton" Icon="Save" Label="Zapisz" Click="saveFavoritesButton_Click" />
             <AppBarButton x:Name="loadFavoritesButton" Icon="OpenFile" Label="Wczytaj z pliku" Click="loadFavoritesButton_Click" />
+            <AppBarButton x:Name="returnButton" Icon="Back" Label="Powrót" Click="returnButton_Click"/>
         </CommandBar>
     </Page.BottomAppBar>
     <Grid>
@@ -29,33 +31,39 @@
             <ColumnDefinition Width="27*"/>
             <ColumnDefinition Width="13*"/>
         </Grid.ColumnDefinitions>
-        <Pivot x:Uid="Pivot" Title="Poradnik" x:Name="PivotApp" CommonNavigationTransitionInfo.IsStaggerElement="True" SelectionChanged="PivotApp_SelectionChanged" Grid.ColumnSpan="2">
+        <Pivot x:Uid="Pivot" Title="Poradnik" x:Name="PivotApp" CommonNavigationTransitionInfo.IsStaggerElement="True" 
+               SelectionChanged="PivotApp_SelectionChanged" Grid.ColumnSpan="2" Loaded="PivotApp_Loaded">
             <PivotItem 
-                x:Uid="Guides"
+                x:Name="guidesItem"
                 Margin="19,14.5,0,0"
                 Header="Poradniki"
                 CommonNavigationTransitionInfo.IsStaggerElement="True">
                 <Grid>
-                    <Button x:Name="dataDownload" Content="Pobierz" HorizontalAlignment="Left" Margin="262,403,0,0" VerticalAlignment="Top" Click="button_Click"/>
                     <TextBlock x:Name="jsonView" HorizontalAlignment="Left" Margin="10,413,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="99" Width="247" FontSize="8"/>
-                    <ListView x:Name="listGuide" HorizontalAlignment="Left" Height="409" Margin="0,-1,0,0" VerticalAlignment="Top" Width="377" ItemClick="listGuide_ItemClick" IsItemClickEnabled="True" >
+                    <ListView x:Name="listOfGuides" HorizontalAlignment="Left" Height="409" Margin="0,-1,0,0" VerticalAlignment="Top" Width="377" ItemClick="listGuide_ItemClick" IsItemClickEnabled="True" >
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Border Margin="0,0,0,10" Background="#FF1DCFCF"  BorderBrush="Black" Width="{Binding ElementName=listGuide, Path=ActualWidth}">
+                                <Border Margin="0,0,0,10" Background="#FF1DCFCF"  BorderBrush="Black" >
                                     <StackPanel>
                                         <Image x:Name="SlideImage"  Source="{Binding ImageSos}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" 
                                            IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" IsTapEnabled="False"/>
                                         <TextBlock Text="{Binding Id}" FontSize="20" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Name}" FontSize="20" TextWrapping="Wrap"/>
                                         <TextBlock Text="{Binding Description}" FontSize="20" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>
                         </ListView.ItemTemplate>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
                     </ListView>
                 </Grid>
             </PivotItem>
             <PivotItem 
-                x:Uid="Search"
+                x:Name="searchItem"
                 Margin="19,14.5,0,0"
                 Header="Szukaj"
                 CommonNavigationTransitionInfo.IsStaggerElement="True">
@@ -63,43 +71,77 @@
                     <Grid.Background>
                         <ImageBrush Stretch="Fill"/>
                     </Grid.Background>
-                    <ListView x:Name="searchGuideList" HorizontalAlignment="Left" Margin="0,67,0,0" Width="377" ItemClick="listGuide_ItemClick" IsItemClickEnabled="True" Height="377" VerticalAlignment="Top" >
+                    <ListView x:Name="listOfSearched" HorizontalAlignment="Left" Margin="0,67,0,0" Width="377" ItemClick="listOfSearched_ItemClick" IsItemClickEnabled="True" Height="377" VerticalAlignment="Top" >
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Border Margin="0,0,0,10" Background="#FF1DCFCF"  BorderBrush="Black" Width="{Binding ElementName=searchGuideList, Path=ActualWidth}">
+                                <Border Margin="0,0,0,10" Background="#FF1DCFCF"  BorderBrush="Black">
                                     <StackPanel>
                                         <Image Source="{Binding ImageSos}" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="250" MaxHeight="250" 
                                            IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" IsTapEnabled="False"/>
                                         <TextBlock Text="{Binding Id}" FontSize="20"/>
-                                        <TextBlock Text="{Binding Description}" FontSize="20"/>
+                                        <TextBlock Text="{Binding Name}" FontSize="20" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Description}" FontSize="20" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>
                         </ListView.ItemTemplate>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
                     </ListView>
                     <TextBox x:Name="searchBox" HorizontalAlignment="Left" Margin="30,10,0,0" TextWrapping="Wrap" Text="Szukaj" VerticalAlignment="Top" Width="212" GotFocus="login_GotFocus"/>
                     <Button x:Name="searchButton" Content="Szukaj" HorizontalAlignment="Left" Margin="247,1,0,0"  VerticalAlignment="Top" Click="searchButton_Click" />
                 </Grid>
             </PivotItem>
             <PivotItem 
-                x:Uid="Category"
-                Margin="19,14.5,0,0"
+                x:Name="categoriesItem"
+                Margin="10,10,10,11.333"
                 Header="Kategorie"
                 CommonNavigationTransitionInfo.IsStaggerElement="True">
-                <ListView x:Name="listOfCategories" HorizontalAlignment="Left" Height="409" Margin="0,-1,0,0" VerticalAlignment="Top" Width="377" IsItemClickEnabled="True" >
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <Border Margin="0,0,0,10" Background="#FF1DCFCF"  BorderBrush="Black" Width="{Binding ElementName=listOfCategories, Path=ActualWidth}">
-                                <StackPanel>
-                                    <TextBlock Text="{Binding}" FontSize="20" TextWrapping="Wrap"/>
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+                <Grid>
+                    <ListView x:Name="listOfCategories" HorizontalAlignment="Left" Margin="0,-1,0,0" VerticalAlignment="Top" Width="377" IsItemClickEnabled="True" ItemClick="listOfCategories_ItemClick" >
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,0,0,10" Background="#FF1DCFCF"  BorderBrush="Black" >
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" FontSize="20" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Description}" FontSize="20" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                    <ListView x:Name="listOfGuidesFromCategory" HorizontalAlignment="Left" Height="455" Margin="0,-1,0,-7" VerticalAlignment="Top" Width="377" ItemClick="listGuide_ItemClick" IsItemClickEnabled="True" Visibility="Collapsed" >
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,0,0,10" Background="#FF1DCFCF"  BorderBrush="Black" >
+                                    <StackPanel>
+                                        <Image Source="{Binding ImageSos}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" 
+                                           IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" IsTapEnabled="False"/>
+                                        <TextBlock Text="{Binding Id}" FontSize="20" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Name}" FontSize="20" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Description}" FontSize="20" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                </Grid>
             </PivotItem>
             <PivotItem 
-                x:Uid="LoginPage"
+                x:Name="loginItem"
                 Margin="19,14.5,0,0"
                 Header="Konto"
                 CommonNavigationTransitionInfo.IsStaggerElement="True">
@@ -116,24 +158,30 @@
                 </Grid>
             </PivotItem>
             <PivotItem 
-                x:Name="favoritesView"
+                x:Name="favoritesItem"
                 Margin="19,14.5,0,0"
                 Header="Ulubione"
                 CommonNavigationTransitionInfo.IsStaggerElement="True" >
                 <Grid>
-                    <ListView x:Name="favoriteGuides" HorizontalAlignment="Left" Height="409" Margin="0,-1,0,0" VerticalAlignment="Top" Width="377"  IsItemClickEnabled="True" ItemClick="favoriteGuides_ItemClick" >
+                    <ListView x:Name="listOfFavorites" HorizontalAlignment="Left" Height="409" Margin="0,-1,0,0" VerticalAlignment="Top" Width="377"  IsItemClickEnabled="True" ItemClick="favoriteGuides_ItemClick" >
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Border Margin="0,0,0,10" Background="#FF1DCFCF"  BorderBrush="Black" Width="{Binding ElementName=favoriteGuides, Path=ActualWidth}">
+                                <Border Margin="0,0,0,10" Background="#FF1DCFCF"  BorderBrush="Black" >
                                     <StackPanel>
                                         <Image  Source="{Binding ImageSos}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" 
                                            IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" IsTapEnabled="False"/>
                                         <TextBlock Text="{Binding Id}" FontSize="20" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Name}" FontSize="20" TextWrapping="Wrap"/>
                                         <TextBlock Text="{Binding Description}" FontSize="20" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>
                         </ListView.ItemTemplate>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
                     </ListView>
                 </Grid>
             </PivotItem>

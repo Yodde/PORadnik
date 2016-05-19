@@ -15,30 +15,32 @@ namespace PORadnik {
         string authenticationURL = "http://poradnik.mikroprint.pl/get_api_key.php?";
         string imageURL = "http://poradnik.mikroprint.pl/get_images.php?id=";
         string downloadImageURL = "http://poradnik.mikroprint.pl/images/";
-        public string searchUrl = "http://poradnik.mikroprint.pl/rest_api.php/guides/search/";
-        string username = "username=";
-        string hash = "hash=";
-        string success = "success";
-        string fail = "0";
-        string failMessage = "Nie mozna nawiązać poprawnego połączenia";
-        const string folderName = "Saved";
-        const string fileName = "Favorites";
+        public string SearchUrl = "http://poradnik.mikroprint.pl/rest_api.php/guides/search/";
+        public string categoriesURL = "http://poradnik.mikroprint.pl/api.php/category/";
+        public string CategoryGuidesURL = "http://poradnik.mikroprint.pl/rest_api.php/guides/category/";
+        const string Username = "username=";
+        const string Hash = "hash=";
+        const string Success = "success";
+        const string Fail = "0";
+        const string FailMessage = "Nie mozna nawiązać poprawnego połączenia";
+        const string FolderName = "Saved";
+        const string FileName = "Favorites";
         public List<Guide> Guides { get; set; }
-        public List<Guide> StorageGuides { get; set; } //?? to storage guides when in other views
+        public List<Guide> CategoryGuides { get; set; }
+        public List<Guide> SearchedGuides { get; set; }
         public static string api = "";
         public int guideId = 0;
+
         public MyClass() {
             Guides = new List<Guide>();
-            List<string> cat = new List<string>() { "Motoryzacja", "Kuchnia", "Ogród" };
-            Categories.CategoriesList = cat;
         }
-        public string GetGuides(string url) {
+        public async Task<string> GetGuides(string url) {
             string json = "";
             using (var http = new HttpClient()) {
-                var response = http.GetAsync(url).Result;
+                var response = await http.GetAsync(url);
                 if (response.IsSuccessStatusCode) {
                     var content = response.Content;
-                    json = content.ReadAsStringAsync().Result;
+                    json = await content.ReadAsStringAsync();
                     JObject jobject = JObject.Parse(json);
                     IList<JToken> results = jobject["guides"].Children().ToList();
                     IList<Guide> guideResults = new List<Guide>();
@@ -49,22 +51,23 @@ namespace PORadnik {
                     Guides = (List<Guide>)guideResults;
                 }
                 else
-                    return failMessage;
+                    return FailMessage;
                 return json;
             }
         }
-        public List<Slide> GetSlides(string url, Guide guide) {
+
+        public async Task<List<Slide>> GetSlides(string url, Guide guide) {
             List<Slide> slides = new List<Slide>();
             using (var http = new HttpClient()) {
-                var response = http.GetAsync(url + guide.Id).Result;
+                var response = await http.GetAsync(url + guide.Id);
                 if (response.IsSuccessStatusCode) {
                     var content = response.Content;
-                    var json = content.ReadAsStringAsync().Result;
+                    var json = await content.ReadAsStringAsync();
                     JObject jobject = JObject.Parse(json);
                     IList<JToken> results = jobject["slides"].Children().ToList();
                     foreach (JToken result in results) {
                         Slide slide = JsonConvert.DeserializeObject<Slide>(result.ToString());
-                        GetImage(slide, out slide);
+                        slide = await GetImage(slide);
                         slides.Add(slide);
                     }
                 }
@@ -74,13 +77,13 @@ namespace PORadnik {
             }
             return slides;
         }
-        public List<Guide> Search(string url, string strToFind) {
+        public async Task<List<Guide>> Search(string url, string strToFind) {
             List<Guide> foundGuides = new List<Guide>();
             using (var http = new HttpClient()) {
-                var response = http.GetAsync(url + strToFind).Result;////do poprawy!!!
+                var response = await http.GetAsync(url + strToFind);////do poprawy!!!
                 if (response.IsSuccessStatusCode) {
                     var content = response.Content;
-                    var json = content.ReadAsStringAsync().Result;
+                    var json = await content.ReadAsStringAsync();
                     JObject jobject = JObject.Parse(json);
                     IList<JToken> results = jobject["guides"].Children().ToList();
                     foreach (var result in results) {
@@ -93,58 +96,103 @@ namespace PORadnik {
             }
             return foundGuides;
         }
-        public void GetImage(Slide slide, out Slide slideOut) {
-            slideOut = slide;
+        public async Task<Slide> GetImage(Slide slide) {
             using (var imageHTTP = new HttpClient()) {
-                var responseImg = imageHTTP.GetAsync(imageURL + slide.Id).Result;
+                var responseImg = await imageHTTP.GetAsync(imageURL + slide.Id);
                 if (responseImg.IsSuccessStatusCode) {
                     var imgContent = responseImg.Content;
-                    var jsonImg = imgContent.ReadAsStringAsync().Result;
+                    var jsonImg = await imgContent.ReadAsStringAsync();
                     JObject imgJo = JObject.Parse(jsonImg);
-                    if (imgJo.GetValue(success).ToString() != fail) {
+                    if (imgJo.GetValue(Success).ToString() != Fail) {
                         IList<JToken> imgs = imgJo["image"].Children().ToList();
                         ImageClass ic = new ImageClass();
                         ic = JsonConvert.DeserializeObject<ImageClass>(imgs[0].ToString());
-                        slideOut.ImageSos = downloadImageURL + ic.Name;
+                        slide.ImageSos = downloadImageURL + ic.Name;
+                    }
+                    else
+                        slide.ImageSos = "";
+                }
+                else
+                    slide.ImageSos = "";
+            }
+            return slide;
+        }
+        public async Task<List<Categories>> GetCategories(string url) {
+            List<Categories> categoriesList = new List<Categories>();
+            using (var categoryHttp = new HttpClient()) {
+                var response = await categoryHttp.GetAsync(categoriesURL);
+                if (response.IsSuccessStatusCode) {
+                    var responseContent = response.Content;
+                    var json = await responseContent.ReadAsStringAsync();
+                    // JObject jObject = JObject.Parse(json);
+                    JArray jArray = JArray.Parse(json);
+                    IList<JToken> categories = jArray.Children().ToList();
+                    foreach (var category in categories) {
+                        categoriesList.Add(JsonConvert.DeserializeObject<Categories>(category.ToString()));
                     }
                 }
             }
+            return categoriesList;
         }
-        public string GetUserApiKey(string url) {
+
+        public async Task<List<Guide>> GetGuidesFromCategory(string url, Categories category) {
+            List<Guide> guides = new List<Guide>();
+            using (var http = new HttpClient()) {
+                var response = await http.GetAsync(url+category.CategoryId);
+                if (response.IsSuccessStatusCode) {
+                    var content = response.Content;
+                    var json = await content.ReadAsStringAsync();
+                    JObject jobject = JObject.Parse(json);
+                    IList<JToken> results = jobject["guides"].Children().ToList();
+                    IList<Guide> guideResults = new List<Guide>();
+                    foreach (JToken result in results) {
+                        Guide guide = JsonConvert.DeserializeObject<Guide>(result.ToString());
+                        guideResults.Add(guide);
+                    }
+                    guides = (List<Guide>)guideResults;
+                }
+                return guides;
+            }
+        }
+
+        public async Task<string> GetUserApiKey(string url) {
             string json = "";
             UserApi api = new UserApi();
             string apikey = "";
             using (var http = new HttpClient()) {
-                var response = http.GetAsync(url).Result;
+                var response = await http.GetAsync(url);
                 if (response.IsSuccessStatusCode) {
                     var content = response.Content;
-                    json = content.ReadAsStringAsync().Result;
+                    json = await content.ReadAsStringAsync();
                     JObject jobject = JObject.Parse(json);
                     api = JsonConvert.DeserializeObject<UserApi>(jobject.ToString());
                     if (api.Success == 1) {
                         apikey = api.Api_key;
                     }
                     else
-                        apikey = fail;
+                        apikey = Fail;
                 }
                 MyClass.api = apikey;
                 return apikey;
             }
         }
-        public string Authentication(string username, string password) {
+        public async Task<string> Authentication(string username, string password) {
             string apikey = string.Empty;
-            var hashedPassword = GenerateSHA(password);
-            apikey = GetUserApiKey(authenticationURL + this.username + username.ToLower() + "&" + this.hash + hashedPassword);
+            var hashedPassword = await GenerateSHA(password);
+            apikey = await GetUserApiKey(authenticationURL + Username + username.ToLower() + "&" + Hash + hashedPassword);
             return apikey;
         }
-        private string GenerateSHA(string password) {
+        private async Task<string> GenerateSHA(string password) {
             var data = System.Text.Encoding.UTF8.GetBytes(password);
-            var hasher = WinRTCrypto.HashAlgorithmProvider.OpenAlgorithm(HashAlgorithm.Sha256);
-            byte[] hashbyte = hasher.HashData(data);
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            for (int i = 0; i < hashbyte.Length; i++) {
-                sb.Append(hashbyte[i].ToString("X2"));
-            }
+            Task t = Task.Run(() => {
+                var hasher = WinRTCrypto.HashAlgorithmProvider.OpenAlgorithm(HashAlgorithm.Sha256);
+                byte[] hashbyte = hasher.HashData(data);
+                for (int i = 0; i < hashbyte.Length; i++) {
+                    sb.Append(hashbyte[i].ToString("X2"));
+                }
+            });
+            await t;
             return sb.ToString().ToLower();
 
         }
@@ -158,15 +206,16 @@ namespace PORadnik {
 
         public async Task SaveFavorites(string json) {
             IFolder rootFolder = FileSystem.Current.LocalStorage;
-            IFolder folder = await rootFolder.CreateFolderAsync(folderName, CreationCollisionOption.OpenIfExists);
-            IFile file = await folder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting);
+            IFolder folder = await rootFolder.CreateFolderAsync(FolderName, CreationCollisionOption.OpenIfExists);
+            IFile file = await folder.CreateFileAsync(FileName, CreationCollisionOption.ReplaceExisting);
             await file.WriteAllTextAsync(json);
         }
         public async Task<string> LoadFavorites() {
             IFolder rootFolder = FileSystem.Current.LocalStorage;
-            IFolder folder = await rootFolder.GetFolderAsync(folderName);
-            IFile file = await folder.GetFileAsync(fileName);
+            IFolder folder = await rootFolder.GetFolderAsync(FolderName);
+            IFile file = await folder.GetFileAsync(FileName);
             return await file.ReadAllTextAsync();
+
         }
     }
 }
