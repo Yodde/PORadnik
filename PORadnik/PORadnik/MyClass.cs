@@ -10,16 +10,15 @@ using PCLStorage;
 namespace PORadnik {
     public class MyClass {
         public string Url { get { return url; } }
-        string url = "http://poradnik.mikroprint.pl/rest_api.php/guides";
-        public string urlSlide = "http://poradnik.mikroprint.pl/rest_api.php/slides/";
-        string authenticationURL = "http://poradnik.mikroprint.pl/get_api_key.php?";
-        string imageURL = "http://poradnik.mikroprint.pl/get_images.php?id=";
-        string downloadImageURL = "http://poradnik.mikroprint.pl/images/";
-        public string SearchUrl = "http://poradnik.mikroprint.pl/rest_api.php/guides/search/";
-        public string categoriesURL = "http://poradnik.mikroprint.pl/api.php/category/";
-        public string CategoryGuidesURL = "http://poradnik.mikroprint.pl/rest_api.php/guides/category/";
-        const string Username = "username=";
-        const string Hash = "hash=";
+        string url = "http://91.134.138.82/rest.php/guides";
+        public string urlSlide = "http://91.134.138.82/rest.php/slides/";
+        string authenticationURL = "http://91.134.138.82/rest.php/auth/";
+        string getUserDetails = "http://91.134.138.82/rest.php/user/";
+        public string SearchUrl = "http://91.134.138.82/rest.php/guides/search/";
+        public string categoriesURL = "http://91.134.138.82/rest.php/categories";
+        public string CategoryGuidesURL = "http://91.134.138.82/rest.php/guides/category/";
+        public string OpinionURL = "http://91.134.138.82/rest.php/opinion/";
+        const string UserOpinion = "/user/";
         const string Success = "success";
         const string Fail = "0";
         const string FailMessage = "Nie mozna nawiązać poprawnego połączenia";
@@ -28,7 +27,8 @@ namespace PORadnik {
         public List<Guide> Guides { get; set; }
         public List<Guide> CategoryGuides { get; set; }
         public List<Guide> SearchedGuides { get; set; }
-        public static string api = "";
+        //   public static string api = "";
+        public User user = null;
         public int guideId = 0;
 
         public MyClass() {
@@ -67,7 +67,7 @@ namespace PORadnik {
                     IList<JToken> results = jobject["slides"].Children().ToList();
                     foreach (JToken result in results) {
                         Slide slide = JsonConvert.DeserializeObject<Slide>(result.ToString());
-                        slide = await GetImage(slide);
+                        ///slide = await GetImage(slide);
                         slides.Add(slide);
                     }
                 }
@@ -96,27 +96,27 @@ namespace PORadnik {
             }
             return foundGuides;
         }
-        public async Task<Slide> GetImage(Slide slide) {
-            using (var imageHTTP = new HttpClient()) {
-                var responseImg = await imageHTTP.GetAsync(imageURL + slide.Id);
-                if (responseImg.IsSuccessStatusCode) {
-                    var imgContent = responseImg.Content;
-                    var jsonImg = await imgContent.ReadAsStringAsync();
-                    JObject imgJo = JObject.Parse(jsonImg);
-                    if (imgJo.GetValue(Success).ToString() != Fail) {
-                        IList<JToken> imgs = imgJo["image"].Children().ToList();
-                        ImageClass ic = new ImageClass();
-                        ic = JsonConvert.DeserializeObject<ImageClass>(imgs[0].ToString());
-                        slide.ImageSos = downloadImageURL + ic.Name;
-                    }
-                    else
-                        slide.ImageSos = "";
-                }
-                else
-                    slide.ImageSos = "";
-            }
-            return slide;
-        }
+        //public async Task<Slide> GetImage(Slide slide) {
+        //    using (var imageHTTP = new HttpClient()) {
+        //        var responseImg = await imageHTTP.GetAsync(imageURL + slide.Id);
+        //        if (responseImg.IsSuccessStatusCode) {
+        //            var imgContent = responseImg.Content;
+        //            var jsonImg = await imgContent.ReadAsStringAsync();
+        //            JObject imgJo = JObject.Parse(jsonImg);
+        //            if (imgJo.GetValue(Success).ToString() != Fail) {
+        //                IList<JToken> imgs = imgJo["image"].Children().ToList();
+        //                ImageClass ic = new ImageClass();
+        //                ic = JsonConvert.DeserializeObject<ImageClass>(imgs[0].ToString());
+        //                slide.ImageSos = downloadImageURL + ic.Name;
+        //            }
+        //            else
+        //                slide.ImageSos = "";
+        //        }
+        //        else
+        //            slide.ImageSos = "";
+        //    }
+        //    return slide;
+        //}
         public async Task<List<Categories>> GetCategories(string url) {
             List<Categories> categoriesList = new List<Categories>();
             using (var categoryHttp = new HttpClient()) {
@@ -124,10 +124,9 @@ namespace PORadnik {
                 if (response.IsSuccessStatusCode) {
                     var responseContent = response.Content;
                     var json = await responseContent.ReadAsStringAsync();
-                    // JObject jObject = JObject.Parse(json);
-                    JArray jArray = JArray.Parse(json);
-                    IList<JToken> categories = jArray.Children().ToList();
-                    foreach (var category in categories) {
+                    JObject jObject = JObject.Parse(json);
+                    IList<JToken> results = jObject["categories"].Children().ToList();
+                    foreach (var category in results) {
                         categoriesList.Add(JsonConvert.DeserializeObject<Categories>(category.ToString()));
                     }
                 }
@@ -138,7 +137,7 @@ namespace PORadnik {
         public async Task<List<Guide>> GetGuidesFromCategory(string url, Categories category) {
             List<Guide> guides = new List<Guide>();
             using (var http = new HttpClient()) {
-                var response = await http.GetAsync(url+category.CategoryId);
+                var response = await http.GetAsync(url + category.CategoryId);
                 if (response.IsSuccessStatusCode) {
                     var content = response.Content;
                     var json = await content.ReadAsStringAsync();
@@ -155,32 +154,99 @@ namespace PORadnik {
             }
         }
 
-        public async Task<string> GetUserApiKey(string url) {
+        public async Task<Opinion> GetOpinion(int guideId) {
+            Opinion opinon = new Opinion();
+            try {
+                using (var http = new HttpClient()) {
+                    var response = await http.GetAsync(OpinionURL + guideId);
+                    if (response.IsSuccessStatusCode) {
+                        var content = response.Content;
+                        var json = await content.ReadAsStringAsync();
+                        JObject jobject = JObject.Parse(json);
+                        IList<JToken> result = jobject["opinion"].Children().ToList();
+                        var opinion = JsonConvert.DeserializeObject<Opinion>(result[0].ToString());
+                        if (user != null) {
+                            opinion = await GetUserOpinion(opinion, guideId, user.UserID);
+                        }
+                        return opinion;
+                    }
+                    else
+                        return null;
+                }
+            }
+            catch (System.ArgumentNullException e) {
+                return null;
+            }
+            catch (System.ArgumentOutOfRangeException e) {
+                return null;
+            }
+        }
+        public async Task<Opinion> GetUserOpinion(Opinion opinion, int guideId, int userId) {
+            using (var http = new HttpClient()) {
+                var response = await http.GetAsync(OpinionURL + guideId + UserOpinion + userId);
+                if (response.IsSuccessStatusCode) {
+                    var content = response.Content;
+                    var json = await content.ReadAsStringAsync();
+                    JObject jObject = JObject.Parse(json);
+                    try {
+                        IList<JToken> result = jObject["opinion"].Children().ToList();
+                        var o = JsonConvert.DeserializeObject<Opinion>(result[0].ToString());
+                        opinion.UserID = o.UserID;
+                        opinion.GuideID = o.GuideID;
+                        opinion.Value = o.Value;
+                    }
+                    catch (System.ArgumentOutOfRangeException) {
+                        return opinion;
+                    }
+                }
+            }
+            return opinion;
+        }
+
+        public async Task<UserApi> GetUserApi(string url) {
             string json = "";
             UserApi api = new UserApi();
-            string apikey = "";
             using (var http = new HttpClient()) {
                 var response = await http.GetAsync(url);
                 if (response.IsSuccessStatusCode) {
                     var content = response.Content;
                     json = await content.ReadAsStringAsync();
-                    JObject jobject = JObject.Parse(json);
-                    api = JsonConvert.DeserializeObject<UserApi>(jobject.ToString());
-                    if (api.Success == 1) {
-                        apikey = api.Api_key;
+                    try {
+                        JObject jobject = JObject.Parse(json);
+                        api = JsonConvert.DeserializeObject<UserApi>(jobject.ToString());
                     }
-                    else
-                        apikey = Fail;
+                    catch (JsonReaderException) {
+                        
+                        return null;
+                    }
                 }
-                MyClass.api = apikey;
-                return apikey;
+                else
+                    return null;
+                return api;
             }
         }
-        public async Task<string> Authentication(string username, string password) {
-            string apikey = string.Empty;
+
+        public async Task<User> GetUserDetails(int id) {
+            string json = "";
+            using (var http = new HttpClient()) {
+                var response = await http.GetAsync(getUserDetails + id);
+                if (response.IsSuccessStatusCode) {
+                    var content = response.Content;
+                    json = await content.ReadAsStringAsync();
+                    JObject jObject = JObject.Parse(json);
+                    IList<JToken> result = jObject["user"].Children().ToList();
+                    return JsonConvert.DeserializeObject<User>(result[0].ToString());
+                }
+                else
+                    return null;
+            }
+        }
+
+        public async Task<UserApi> Authentication(string username, string password) {
+            UserApi token = new UserApi();
             var hashedPassword = await GenerateSHA(password);
-            apikey = await GetUserApiKey(authenticationURL + Username + username.ToLower() + "&" + Hash + hashedPassword);
-            return apikey;
+            token = await GetUserApi(authenticationURL + username.ToLower() + "/" + hashedPassword);
+            return token;
         }
         private async Task<string> GenerateSHA(string password) {
             var data = System.Text.Encoding.UTF8.GetBytes(password);
@@ -196,6 +262,9 @@ namespace PORadnik {
             return sb.ToString().ToLower();
 
         }
+
+        //Zapisywanie i wczytywanie pliku
+
         public string SerializeGuideList(List<Guide> g) {
             return JsonConvert.SerializeObject(g);
         }

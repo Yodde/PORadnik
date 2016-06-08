@@ -5,15 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace PORadnik {
-    class UserApi {
-        private string api_key;
+    public class UserApi {
+        private string token;
 
-        public string Api_key {
-            get { return api_key; }
-            set { api_key = value; }
+        public string Token {
+            get { return token; }
+            set { token = value; }
         }
         public int Success { get; set; }
         public string Message { get; set; }
+        public int Id { get; set; }
         //public string User { get; set; }
     }
 }

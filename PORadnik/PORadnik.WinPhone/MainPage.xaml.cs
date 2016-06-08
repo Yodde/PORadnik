@@ -15,6 +15,7 @@ namespace PORadnik.WinPhone {
     /// </summary>
     public sealed partial class MainPage : Windows.UI.Xaml.Controls.Page {
         string loginBox = "login";
+        const string poradnikTitle = "Poradnik";
         enum PivotItems {
             Guides,
             Search,
@@ -56,14 +57,19 @@ namespace PORadnik.WinPhone {
             myClass.guideId = 0;
             var guide = (Guide)e.ClickedItem;
             List<Slide> slides = await myClass.GetSlides(myClass.urlSlide, guide);
+            Opinion opinion = await myClass.GetOpinion(guide.Id);
             myClass.Guides.First(g => g.Id == guide.Id).Slides = slides;
             try {
                 list.ItemsSource = slides;
+                if (opinion != null) {
+                    PivotApp.Title = opinion.ToString();
+                }
                 myClass.guideId = guide.Id;
                 AppBarButtonsVisibleChange(true, false, false, true);
             }
             catch (InvalidOperationException ioe) {
-                jsonView.Text = ioe.Message;
+                MessageDialog msg = new MessageDialog(ioe.Message);
+                await msg.ShowAsync();
             }
             list.IsItemClickEnabled = false;
             returnClickedxTimes = 0;
@@ -73,15 +79,29 @@ namespace PORadnik.WinPhone {
             if (login.Text != string.Empty && login.Text != loginBox
                 && password.Password != string.Empty) {
                 var apikey = await myClass.Authentication(login.Text, password.Password);
-                jsonView.Text = apikey;
-                if (apikey != "0") {
-                    loginGrid.Visibility = Visibility.Collapsed;
-                    loggedGridTexbox.Text = "Witaj " + login.Text;
-                    loggedGrid.Visibility = Visibility.Visible;
+                if (apikey != null) {
+                    myClass.user = await myClass.GetUserDetails(apikey.Id);
+                    var user = myClass.user;
+                    if (user != null) {
+                        loginGrid.Visibility = Visibility.Collapsed;
+                        loggedGrid.Visibility = Visibility.Visible;
+                        string s = "";
+                        try {
+                             s = "Witaj " + user.Nick.ToString() + "\nTwoje dane:" + "\nImię: " + user.LastName.ToString() +
+                                "\nNazwisko: " + user.FirstName.ToString() + "\nE-Mail: " + user.Mail.ToString();
+                        }
+                        catch (System.NullReferenceException) {
+                            s = "Witaj" + user.Nick.ToString();
+                        }
+                        loggedGridTexbox.Text = s;
+                    }
                 }
                 else {
+                    MessageDialog msg = new MessageDialog("Niewłaściwe dane logowania");
                     loginGrid.Visibility = Visibility.Visible;
                     loggedGrid.Visibility = Visibility.Collapsed;
+                    myClass.user = null;
+                    await msg.ShowAsync();
                 }
             }
         }
@@ -97,11 +117,11 @@ namespace PORadnik.WinPhone {
         }
 
         private void logout_Click(object sender, RoutedEventArgs e) {
-            MyClass.api = "0";
             login.Text = "";
             password.Password = "";
             loginGrid.Visibility = Visibility.Visible;
             loggedGrid.Visibility = Visibility.Collapsed;
+            myClass.user = null;
         }
         private void favButton_Click(object sender, RoutedEventArgs e) {
             try {
@@ -154,6 +174,7 @@ namespace PORadnik.WinPhone {
         private void PivotApp_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             var pivot = (Pivot)sender;
             var pivotItem = (PivotItem)pivot.SelectedItem;
+            PivotApp.Title = poradnikTitle;
             if (pivot != null && pivotItem != null) {
                 if (pivotItem == guidesItem) {
                     GuidesPivotLoad();
@@ -236,7 +257,7 @@ namespace PORadnik.WinPhone {
         }
 
         private async void PivotApp_Loaded(object sender, RoutedEventArgs e) {
-           // await GuidesPivotLoad();
+            // await GuidesPivotLoad();
             await CategoriesPivotLoad();
         }
 
@@ -281,6 +302,7 @@ namespace PORadnik.WinPhone {
                 default:
                     break;
             }
+            PivotApp.Title = poradnikTitle;
         }
 
         private void goToSearchButton_Click(object sender, RoutedEventArgs e) {
@@ -294,7 +316,7 @@ namespace PORadnik.WinPhone {
             listOfCategories.Visibility = Visibility.Collapsed;
             listOfGuidesFromCategory.Visibility = Visibility.Visible;
             AppBarButtonsVisibleChange(true, false, false, true);
-            
+
         }
 
         private async void listOfSearched_ItemClick(object sender, ItemClickEventArgs e) {

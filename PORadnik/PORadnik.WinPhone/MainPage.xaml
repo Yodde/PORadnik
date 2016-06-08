@@ -5,9 +5,15 @@
     xmlns:local="using:PORadnik.WinPhone"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:my="using:PORadnik" Background="DarkCyan"
+    xmlns:my="using:PORadnik"
     mc:Ignorable="d"
     NavigationCacheMode="Enabled">
+    <Page.Background>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="Black" Offset="1"/>
+            <GradientStop Color="#FF9DE256"/>
+        </LinearGradientBrush>
+    </Page.Background>
     <Page.Transitions>
         <TransitionCollection>
             <NavigationThemeTransition>
@@ -39,16 +45,15 @@
                 Header="Poradniki"
                 CommonNavigationTransitionInfo.IsStaggerElement="True">
                 <Grid>
-                    <TextBlock x:Name="jsonView" HorizontalAlignment="Left" Margin="10,413,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="99" Width="247" FontSize="8"/>
+                    <TextBlock x:Name="jsonView" HorizontalAlignment="Left" Margin="10,413,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="99" Width="247" FontSize="15"/>
                     <ListView x:Name="listOfGuides" HorizontalAlignment="Left" Height="409" Margin="0,-1,0,0" VerticalAlignment="Top" Width="377" ItemClick="listGuide_ItemClick" IsItemClickEnabled="True" >
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Border Margin="0,0,0,10" Background="#FF1DCFCF"  BorderBrush="Black" >
+                                <Border Margin="0,0,0,10" Background="#FF78A8A8"  BorderBrush="White" >
                                     <StackPanel>
-                                        <Image x:Name="SlideImage"  Source="{Binding ImageSos}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" 
+                                        <Image  Source="{Binding ImageName}" HorizontalAlignment="Center" VerticalAlignment="Center" MaxHeight="200" MaxWidth="200" 
                                            IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" IsTapEnabled="False"/>
-                                        <TextBlock Text="{Binding Id}" FontSize="20" TextWrapping="Wrap"/>
-                                        <TextBlock Text="{Binding Name}" FontSize="20" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="Bold" TextWrapping="Wrap"/>
                                         <TextBlock Text="{Binding Description}" FontSize="20" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
@@ -76,10 +81,9 @@
                             <DataTemplate>
                                 <Border Margin="0,0,0,10" Background="#FF1DCFCF"  BorderBrush="Black">
                                     <StackPanel>
-                                        <Image Source="{Binding ImageSos}" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="250" MaxHeight="250" 
+                                        <Image Source="{Binding ImageName}" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="250" MaxHeight="250" 
                                            IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" IsTapEnabled="False"/>
-                                        <TextBlock Text="{Binding Id}" FontSize="20"/>
-                                        <TextBlock Text="{Binding Name}" FontSize="20" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="Bold" TextWrapping="Wrap"/>
                                         <TextBlock Text="{Binding Description}" FontSize="20" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
@@ -106,7 +110,7 @@
                             <DataTemplate>
                                 <Border Margin="0,0,0,10" Background="#FF1DCFCF"  BorderBrush="Black" >
                                     <StackPanel>
-                                        <TextBlock Text="{Binding Name}" FontSize="20" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="Bold" TextWrapping="Wrap"/>
                                         <TextBlock Text="{Binding Description}" FontSize="20" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
@@ -123,10 +127,9 @@
                             <DataTemplate>
                                 <Border Margin="0,0,0,10" Background="#FF1DCFCF"  BorderBrush="Black" >
                                     <StackPanel>
-                                        <Image Source="{Binding ImageSos}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" 
+                                        <Image Source="{Binding ImageName}" HorizontalAlignment="Center" VerticalAlignment="Center" MaxHeight="200" MaxWidth="200" 
                                            IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" IsTapEnabled="False"/>
-                                        <TextBlock Text="{Binding Id}" FontSize="20" TextWrapping="Wrap"/>
-                                        <TextBlock Text="{Binding Name}" FontSize="20" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="Bold" TextWrapping="Wrap"/>
                                         <TextBlock Text="{Binding Description}" FontSize="20" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
@@ -152,7 +155,7 @@
                         <PasswordBox x:Name="password" HorizontalAlignment="Left" Margin="4,66,0,0" VerticalAlignment="Top" Width="191"/>
                     </Grid>
                     <Grid x:Name="loggedGrid" Visibility="Collapsed">
-                        <TextBlock x:Name="loggedGridTexbox" Height="50" Margin="0,0,0,404" Text=""/>
+                        <TextBlock x:Name="loggedGridTexbox" Margin="0,0,0,68" Text="" FontSize="20"/>
                         <Button x:Name="logout" Content="Wyloguj" Margin="262,396,0,1" Click="logout_Click"/>
                     </Grid>
                 </Grid>
@@ -168,10 +171,9 @@
                             <DataTemplate>
                                 <Border Margin="0,0,0,10" Background="#FF1DCFCF"  BorderBrush="Black" >
                                     <StackPanel>
-                                        <Image  Source="{Binding ImageSos}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" 
+                                        <Image  Source="{Binding ImageName}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" 
                                            IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" IsTapEnabled="False"/>
-                                        <TextBlock Text="{Binding Id}" FontSize="20" TextWrapping="Wrap"/>
-                                        <TextBlock Text="{Binding Name}" FontSize="20" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="Bold" TextWrapping="Wrap"/>
                                         <TextBlock Text="{Binding Description}" FontSize="20" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>

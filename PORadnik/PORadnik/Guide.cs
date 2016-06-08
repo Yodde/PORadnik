@@ -2,6 +2,7 @@
 
 namespace PORadnik {
     public class Guide {
+        const string ImageUrl = "http://91.134.138.82/Poradnik/images/";
         private int id;
         public int Id {
             get { return id; }
@@ -24,6 +25,13 @@ namespace PORadnik {
         public string Name {
             get { return name; }
             set { name = value; }
+        }
+
+        private string imageName;
+
+        public string ImageName {
+            get { return imageName; }
+            set { imageName = ImageUrl + value; }
         }
 
 
